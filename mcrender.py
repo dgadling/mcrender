@@ -19,7 +19,7 @@ from galleryremote.gallery import GalleryException
 
 
 class MCRenderer(object):
-    def __init__(self, config, album_name):
+    def __init__(self, config, g, album_name):
         self.logger = logging.getLogger('mcrender')
         self.config = config
         self.album_name = album_name
@@ -33,7 +33,7 @@ class MCRenderer(object):
         self.blender_opts = ["blender"] + \
                             config.get('blender', 'args').split() + \
                             ["-P", config.get('blender', 'render_script')]
-        self.mcobj_opts = ["mcobj.exe"] + config.get('mcobj', 'args').split()
+        self.mcobj_opts = ["mcobj"] + config.get('mcobj', 'args').split()
 
         for d in [self.img_dir, self.obj_dir, self.tgz_dir]:
             if not os.path.exists(d):
@@ -92,11 +92,10 @@ class MCRenderer(object):
         else:
             shutil.move(self.victim + ".png", self.img_dir)
 
-    def upload_image(self, g, victim):
+    def upload_image(self):
         self.to_clean = []
-        self.victim = victim
         current_images = [img['title'] for img in
-                              g.fetch_album_images(self.album_name)]
+                              self.g.fetch_album_images(self.album_name)]
 
         img_file = self.victim + ".png"
         if img_file in current_images:
@@ -109,7 +108,7 @@ class MCRenderer(object):
             self.render_image()
 
         self.logger.debug("Uploading")
-        g.add_item(album_name, final_file, self.victim, self.victim)
+        self.g.add_item(album_name, final_file, self.victim, self.victim)
 
         self.cleanup()
 
@@ -135,6 +134,9 @@ if __name__ == "__main__":
     parser.add_option("-d", "--debug", dest="debug",
             default=False, action="store_true",
             help="Turns on debugging (lots of debugging!) [default: %default]")
+    parser.add_option("-r", "--render_only", dest="render_only",
+            default=False, action="store_true",
+            help="If you just want to render, and not upload, use this flag.")
 
     (opts, args) = parser.parse_args()
 
@@ -196,8 +198,13 @@ if __name__ == "__main__":
 
     logger.info("Have %d maps to work on: %s", len(to_work), ", ".join(to_work))
 
-    renderer = MCRenderer(conf, album_name)
+    renderer = MCRenderer(conf, g, album_name)
+    if opts.render_only:
+        method = renderer.render_image
+    else:
+        method = renderer.upload_image
 
     for victim in to_work:
         logger.info("Starting on " + victim)
-        renderer.upload_image(g, victim)
+        renderer.victim = victim
+        method()
