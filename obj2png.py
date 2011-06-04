@@ -4,6 +4,8 @@
 
 import sys
 import os
+import math
+
 import bpy
 from mathutils import *
 
@@ -17,24 +19,6 @@ scene.render.color_mode = 'RGBA'
 scene.render.file_quality = 100             # 90 is defaultscene.render.
 scene.render.parts_x = 128                  # 8 is default
 scene.render.parts_y = 128                  # 8 is default
-
-print("\nConfiguring camera")
-########################################
-# Notes for other views
-########################################
-#camera.location = Vector((27, -27, 30))
-#camera.location = Vector((29, -27, 15))
-
-########################################
-# ORTHOGRAPHIC VIEW
-########################################
-camera = scene.objects["Camera"]
-camera.data.type = 'ORTHO'
-camera.data.ortho_scale = 35.0
-camera.location = Vector((13, -13.5, 13))
-camera.rotation_euler = Euler((0.9773848056793213,
-                               0.0,
-                               0.7853984832763672), 'XYZ')
 
 print("\nConfiguring lighting")
 scene.objects.unlink(scene.objects["Lamp"])
@@ -65,9 +49,30 @@ print("\nLoading and centering %s" % input_file)
 
 bpy.ops.import_scene.obj('EXEC_DEFAULT', filepath=in_f)
 our_mesh = [k for k in scene.objects.keys() if k.startswith("Mesh")][0]
-
 bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
 scene.objects[our_mesh].location = Vector((0, 0, 0))
+
+print("\nConfiguring camera")
+########################################
+# Notes for other views
+########################################
+#camera.location = Vector((27, -27, 30))
+#camera.location = Vector((29, -27, 15))
+
+########################################
+# ORTHOGRAPHIC VIEW
+# Given this orthographic view, where the camera ends up, and how it's angled it
+# seems that setting the ortho scale to 2x the dimensions of the world gives us
+# a pretty good view. Convenient!
+########################################
+camera = scene.objects["Camera"]
+camera.data.type = 'ORTHO'
+camera.data.ortho_scale = 2 * scene.objects[our_mesh].dimensions.x
+camera.location = Vector((11.5, -11.5, 16))
+# NOTE: The blender GUI shows degrees, but this method takes radians!
+camera.rotation_euler = Euler((math.pi * 45.0 / 180,
+                               math.pi *  0.0 / 180,
+                               math.pi * 45.0 / 180), 'XYZ')
 
 print("\nRendering...")
 bpy.ops.render.render()
