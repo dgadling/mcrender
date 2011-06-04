@@ -75,8 +75,5 @@ bpy.ops.render.render()
 print("\nSaving image...")
 bpy.data.images['Render Result'].save_render(filepath=out_f)
 
-print("\nCleaning up")
-scene.objects.unlink(scene.objects[our_mesh])
-
 # Just process one file, due to memory leaks
 sys.exit(0)
