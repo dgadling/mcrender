@@ -5,13 +5,13 @@ This app is meant to do one thing pretty decently: turn Minecraft
 backups/snapshots into nicely rendered PNGs. My personal plan is to use these
 frames to make a timelapse video of construction over time.
 
-It does this using mcobj (quag/mcobj) and [http://www.blender.org/](Blender)
+It does this using mcobj (https://github.com/quag/mcobj) and Blender (http://www.blender.org/)
 
 Requirements
 ------------
 1. blender in your PATH
 2. mcobj in your PATH
-3. [http://python.org](Python 2.[567]); might work in Python3
+3.  Python 2.[567] (http://python.org); might work in Python3, not tested.
 
 Installation / Running
 ----------------------
