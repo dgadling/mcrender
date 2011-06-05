@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # MCRender by David Gadling is licensed under a
 #   Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
 # More details available at http://creativecommons.org/licenses/by-nc-sa/3.0/
@@ -23,6 +25,7 @@ class MCRenderer(object):
         self.logger = logging.getLogger('mcrender')
         self.config = config
         self.album_name = album_name
+        self.g = g
         self.to_clean = []
         self.cwd = os.getcwd()
         self.src_dir = config.get('directories', 'source')
@@ -60,10 +63,11 @@ class MCRenderer(object):
         self.to_clean = ['extracted']
 
     def create_obj(self):
+        obj = os.path.join(self.obj_dir, self.victim + ".obj")
         mtl = os.path.join(self.obj_dir, self.victim + ".mtl")
-        if os.path.exists(self.obj_file) and os.path.exists(mtl):
+        if os.path.exists(obj) and os.path.exists(mtl):
             self.logger.debug("Found pre-computed object!")
-            shutil.move(self.obj_file, self.cwd)
+            shutil.move(obj, self.cwd)
             shutil.move(mtl, self.cwd)
         else:
             if not os.path.exists(os.path.join(self.cwd, self.victim)):
