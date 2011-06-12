@@ -11,15 +11,6 @@ from mathutils import *
 
 scene = bpy.context.scene
 
-print("\nConfiguring renderer")
-scene.render.resolution_x = 1920
-scene.render.resolution_y = 1350
-scene.render.resolution_percentage = 100    # 50 is default
-scene.render.color_mode = 'RGBA'
-scene.render.file_quality = 100             # 90 is defaultscene.render.
-scene.render.parts_x = 128                  # 8 is default
-scene.render.parts_y = 128                  # 8 is default
-
 print("\nConfiguring lighting")
 scene.objects.unlink(scene.objects["Lamp"])
 lights = scene.world.light_settings
@@ -52,27 +43,33 @@ our_mesh = [k for k in scene.objects.keys() if k.startswith("Mesh")][0]
 bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
 scene.objects[our_mesh].location = Vector((0, 0, 0))
 
-print("\nConfiguring camera")
-########################################
-# Notes for other views
-########################################
-#camera.location = Vector((27, -27, 30))
-#camera.location = Vector((29, -27, 15))
+# The size of the mesh we imported is the basic dimension of many of our
+# calculations later on. Store it for easier use later
+base_dimension = scene.objects[our_mesh].dimensions.x
 
-########################################
-# ORTHOGRAPHIC VIEW
-# Given this orthographic view, where the camera ends up, and how it's angled it
-# seems that setting the ortho scale to 2x the dimensions of the world gives us
-# a pretty good view. Convenient!
-########################################
+# NOTE: Most of the values below were determined experimentally. If you want
+# to change them it'll probably take some trial and error.
+print("\nConfiguring camera")
 camera = scene.objects["Camera"]
 camera.data.type = 'ORTHO'
-camera.data.ortho_scale = 2 * scene.objects[our_mesh].dimensions.x
-camera.location = Vector((11.5, -11.5, 16))
-# NOTE: The blender GUI shows degrees, but this method takes radians!
+camera.data.ortho_scale = 2 * base_dimension
+camera.location = Vector((20, -20, 29))
+# NOTE: The blender GUI shows degrees by default, but this method takes radians!
 camera.rotation_euler = Euler((math.pi * 45.0 / 180,
                                math.pi *  0.0 / 180,
                                math.pi * 45.0 / 180), 'XYZ')
+
+print("\nConfiguring renderer")
+# These next two settings make it such that:
+# 1) A minecraft lock is always the same size, pixel wise
+# 2) The output file is "wide-screen"
+scene.render.resolution_x = 1.42 * 93 * base_dimension
+scene.render.resolution_y = 93 * base_dimension
+scene.render.resolution_percentage = 100    # 50 is default
+scene.render.color_mode = 'RGBA'
+scene.render.file_quality = 100             # 90 is defaultscene.render.
+scene.render.parts_x = 128                  # 8 is default
+scene.render.parts_y = 128                  # 8 is default
 
 print("\nRendering...")
 bpy.ops.render.render()
